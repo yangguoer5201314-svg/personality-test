@@ -1,0 +1,26 @@
+{
+  "name": "人格测试工具",
+  "short_name": "人格测试",
+  "description": "通过 12 道情境题，探索你独特的人格特质组合",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f0ff",
+  "theme_color": "#6c5ce7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "education"],
+  "lang": "zh-CN"
+}

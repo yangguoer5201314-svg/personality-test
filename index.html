@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人格测试工具 - 深度人格特质探索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-1: #f5f0ff;
+    --bg-2: #e8f0fe;
+    --bg-3: #fef3e8;
+    --surface: rgba(255,255,255,.85);
+    --surface-hover: rgba(255,255,255,.95);
+    --border: rgba(108,92,231,.15);
+    --text: #1a1a2e;
+    --text-secondary: #6b6b8a;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108,92,231,.2);
+    --green: #00b873;
+    --orange: #f59e0b;
+    --pink: #e75a8a;
+    --blue: #3b82f6;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: .35s cubic-bezier(.4,0,.2,1);
+  }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 30%, rgba(108,92,231,.1) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 500px at 80% 70%, rgba(245,158,11,.08) 0%, transparent 60%),
+      radial-gradient(ellipse 400px 400px at 50% 10%, rgba(59,130,246,.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+  }
+  .screen { display: none; animation: fadeIn .45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .welcome { text-align: center; padding: 40px 0 20px; }
+  .welcome-icon {
+    width: 96px; height: 96px; margin: 0 auto 28px;
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+    box-shadow: 0 0 40px var(--accent-glow), 0 8px 32px rgba(108,92,231,.15);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 40px var(--accent-glow), 0 8px 32px rgba(108,92,231,.15); }
+    50% { box-shadow: 0 0 80px var(--accent-glow), 0 12px 48px rgba(108,92,231,.2); }
+  }
+  .welcome h1 {
+    font-size: 2rem; font-weight: 800; letter-spacing: -.03em;
+    color: var(--text);
+  }
+  .welcome h1 span {
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .welcome p {
+    color: var(--text-secondary); font-size: .95rem; line-height: 1.7;
+    max-width: 420px; margin: 16px auto 0;
+  }
+  .welcome-features {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: 24px 0 32px;
+  }
+  .welcome-features span {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px; font-size: .82rem;
+    color: var(--text-secondary);
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    border: none; color: #fff; font-size: 1rem; font-weight: 600;
+    padding: 16px 40px; border-radius: 12px; cursor: pointer;
+    transition: var(--transition); font-family: inherit;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.7); border: 1px solid var(--border);
+    color: var(--text); font-size: .9rem; font-weight: 500;
+    padding: 12px 24px; border-radius: var(--radius-sm); cursor: pointer;
+    transition: var(--transition); font-family: inherit;
+  }
+  .btn-secondary:hover { background: var(--surface-hover); border-color: var(--accent); }
+  .quiz-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+  }
+  .progress-track {
+    flex: 1; height: 6px; background: rgba(108,92,231,.1);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), #a29bfe);
+    border-radius: 3px; transition: width .5s ease;
+  }
+  .quiz-counter { font-size: .82rem; color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
+  .question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px;
+  }
+  .question-text {
+    font-size: 1.2rem; font-weight: 600; line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,.55); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 18px;
+    cursor: pointer; transition: var(--transition); font-family: inherit;
+    font-size: .92rem; line-height: 1.5; color: var(--text); text-align: left;
+    width: 100%;
+  }
+  .option:hover { border-color: var(--accent); background: rgba(108,92,231,.06); }
+  .option.selected {
+    border-color: var(--accent); background: rgba(108,92,231,.1);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .option .dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .option.selected .dot { border-color: var(--accent); background: var(--accent); }
+  .option.selected .dot::after {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #fff;
+  }
+  .quiz-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 24px;
+  }
+  .btn-nav {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-secondary); padding: 10px 20px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-family: inherit; font-size: .85rem; font-weight: 500;
+    transition: var(--transition);
+  }
+  .btn-nav:hover { border-color: var(--accent); color: var(--text); }
+  .btn-nav:disabled { opacity: .3; cursor: not-allowed; }
+  .btn-nav.primary {
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    border-color: transparent; color: #fff;
+  }
+  .btn-nav.primary:hover { box-shadow: 0 4px 20px var(--accent-glow); }
+  .btn-nav.primary:disabled { opacity: .4; }
+  .result-header { text-align: center; margin-bottom: 32px; }
+  .result-type-badge {
+    display: inline-block; padding: 6px 20px; border-radius: 20px;
+    font-size: .82rem; font-weight: 600; letter-spacing: .04em;
+    margin-bottom: 16px;
+  }
+  .result-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+  .result-subtitle { color: var(--text-secondary); font-size: .95rem; line-height: 1.6; }
+  .result-scores { margin-bottom: 28px; }
+  .score-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .score-label {
+    width: 80px; font-size: .82rem; font-weight: 500; flex-shrink: 0;
+    text-align: right;
+  }
+  .score-bar-track {
+    flex: 1; height: 8px; background: rgba(108,92,231,.08);
+    border-radius: 4px; overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%; border-radius: 4px; transition: width .8s ease;
+  }
+  .score-val {
+    width: 32px; font-size: .78rem; color: var(--text-secondary);
+    font-weight: 600; text-align: right;
+  }
+  .result-detail {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 24px;
+  }
+  .result-detail h3 {
+    font-size: 1rem; font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .result-detail p, .result-detail li {
+    color: var(--text-secondary); font-size: .9rem; line-height: 1.7;
+  }
+  .result-detail ul { padding-left: 20px; list-style: none; }
+  .result-detail li::before { content: "\2022 "; color: var(--accent); font-weight: 700; }
+  .result-detail li { margin-bottom: 4px; }
+  .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .result-actions .btn-secondary svg { width: 16px; height: 16px; }
+  .type-explorer .score-bar-fill { background: var(--green); }
+  .type-explorer .result-type-badge { background: rgba(0,184,115,.12); color: var(--green); }
+  .type-thinker .score-bar-fill { background: var(--blue); }
+  .type-thinker .result-type-badge { background: rgba(59,130,246,.12); color: var(--blue); }
+  .type-guardian .score-bar-fill { background: var(--orange); }
+  .type-guardian .result-type-badge { background: rgba(245,158,11,.12); color: var(--orange); }
+  .type-creator .score-bar-fill { background: var(--pink); }
+  .type-creator .result-type-badge { background: rgba(231,90,138,.12); color: var(--pink); }
+  .type-leader .score-bar-fill { background: var(--red); }
+  .type-leader .result-type-badge { background: rgba(239,68,68,.12); color: var(--red); }
+  .type-peacemaker .score-bar-fill { background: var(--yellow); }
+  .type-peacemaker .result-type-badge { background: rgba(234,179,8,.12); color: var(--yellow); }
+  .score-label.e { color: var(--green); }
+  .score-label.t { color: var(--blue); }
+  .score-label.g { color: var(--orange); }
+  .score-label.c { color: var(--pink); }
+  .score-label.l { color: var(--red); }
+  .score-label.p { color: var(--yellow); }
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    .question-card { padding: 20px; }
+    .question-text { font-size: 1.05rem; }
+    .welcome h1 { font-size: 1.6rem; }
+    .welcome-icon { width: 72px; height: 72px; font-size: 34px; }
+    .result-title { font-size: 1.4rem; }
+    .score-label { width: 60px; font-size: .75rem; }
+    .option { padding: 12px 14px; font-size: .85rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="screen active" id="welcome">
+    <div class="welcome">
+      <div class="welcome-icon">🧠</div>
+      <h1><span>人格测试工具</span></h1>
+      <p>通过 12 道情境题，探索你独特的人格特质组合。<br>没有标准答案，只有更了解自己。</p>
+      <div class="welcome-features">
+        <span>🧭 6 大人格维度</span>
+        <span>⏱ 约 3 分钟</span>
+        <span>🔬 科学启发</span>
+        <span>🔒 匿名</span>
+      </div>
+      <button class="btn-primary" onclick="startQuiz()">
+        开始测试
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="screen" id="quiz">
+    <div class="quiz-header">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="quiz-counter" id="quizCounter">1 / 12</div>
+    </div>
+    <div class="question-card">
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="quiz-actions">
+        <button class="btn-nav" id="prevBtn" onclick="prevQuestion()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:4px"><path d="m15 18-6-6 6-6"/></svg>
+          上一题
+        </button>
+        <button class="btn-nav primary" id="nextBtn" onclick="nextQuestion()" disabled>
+          下一题
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-left:4px"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="screen" id="results"></div>
+</div>
+<script>
+const TYPES = [
+  { id:'explorer',  label:'探索者', emoji:'🧭',
+    desc:'你天生对世界充满好奇。未知不是恐惧，是邀请。你喜欢尝试新事物、探索新领域，在变化和冒险中找到活力。你的开放心态让你成为天生的创新者和先行者。',
+    strengths:['好奇心旺盛，学新东西很快','适应力强，拥抱变化','乐观开朗，感染周围的人','善于发现机会和可能性'],
+    growth:['可能需要培养专注和坚持','偶尔会因兴趣过于分散而半途而废','建议在冲动之前多一份理性评估'] },
+  { id:'thinker',   label:'思考者', emoji:'🧠',
+    desc:'你活在逻辑和概念的王国里。你喜欢拆解问题、寻找规律、构建体系。你做决定前会深思熟虑，追求清晰和准确。你的分析能力让你成为可靠的问题解决者。',
+    strengths:['逻辑严密，善于分析和推理','理性决策，不易被情绪左右','独立学习能力极强','享受智力挑战，追求深度'],
+    growth:['可能显得疏离或过于理性','有时过度分析，错过行动时机','建议多关注情感层面的连接'] },
+  { id:'guardian',  label:'守护者', emoji:'🛡️',
+    desc:'你的温暖和可靠是身边人的港湾。你注重责任、传统和承诺，善于照顾他人。你把稳定和安全感带给周围的人，是大家信赖的后盾。',
+    strengths:['极高的责任感和可靠性','善解人意，共情能力强','组织和管理能力出色','注重细节，做事踏实'],
+    growth:['容易过度付出，忽略自己','对变化适应较慢','偶尔过于保守，需要学会放手'] },
+  { id:'creator',   label:'创造者', emoji:'🎨',
+    desc:'你透过美的滤镜看世界。你敏感、细腻、富有想象力，喜欢用文字、图像、音乐或任何形式表达自我。你的独特视角让平凡的事物变得有趣。',
+    strengths:['丰富的想象力和创意','敏锐的审美和感知力','表达能力强，善于沟通情感','不拘一格，敢于打破常规'],
+    growth:['情绪波动较大','有时过于理想化','需要建立更系统的执行力'] },
+  { id:'leader',    label:'领袖', emoji:'⚡',
+    desc:'你有清晰的目标感和强大的驱动力。你喜欢掌控局面、设定方向、带动团队向前。你的自信和决断力让你天生适合引领变革。',
+    strengths:['目标明确，执行力强','自信果断，敢于担当','激励和带动他人的能力','战略眼光，看得到大局'],
+    growth:['可能显得强势或专断','需要练习倾听不同声音','建议在追求效率时兼顾人情'] },
+  { id:'peacemaker',label:'和事佬', emoji:'🕊️',
+    desc:'你是天然的调和者。你追求和谐、理解与共识，善于站在不同角度看待问题。你的包容和耐心让冲突在你面前自然消解。',
+    strengths:['极强的同理心和包容力','沟通调解能力出众','善于合作，团队润滑剂','情绪稳定，处变不惊'],
+    growth:['有时回避冲突，压抑自己的需求','决策时容易犹豫','建议在追求和谐时也表达真实想法'] }
+];
+const QUESTIONS = [
+  { text:'周末终于到了，你更倾向于怎么度过？',
+    options: [
+      { text:'约朋友去个没去过的地方探索', scores:{ explorer:3, thinker:0, guardian:0, creator:1, leader:1, peacemaker:1 } },
+      { text:'窝在家里看书、研究感兴趣的话题', scores:{ explorer:1, thinker:3, guardian:1, creator:1, leader:0, peacemaker:0 } },
+      { text:'陪家人朋友，做顿饭或一起做些日常的事', scores:{ explorer:0, thinker:0, guardian:3, creator:1, leader:0, peacemaker:2 } },
+      { text:'做点手工、写写东西、画点画', scores:{ explorer:1, thinker:0, creator:3, guardian:1, leader:0, peacemaker:1 } },
+      { text:'规划下周目标，整理待办清单', scores:{ explorer:0, thinker:1, guardian:1, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'团队里出现分歧时，你通常会？',
+    options: [
+      { text:'分析各方论据，找出最合理的方案', scores:{ explorer:1, thinker:3, guardian:0, creator:0, leader:1, peacemaker:1 } },
+      { text:'站出来引导讨论，推动达成共识', scores:{ explorer:1, thinker:1, guardian:1, creator:0, leader:3, peacemaker:0 } },
+      { text:'倾听每个人的想法，帮忙缓解紧张气氛', scores:{ explorer:0, thinker:0, guardian:2, creator:1, leader:0, peacemaker:3 } },
+      { text:'提出一个全新的创意方向来打破僵局', scores:{ explorer:2, thinker:0, guardian:0, creator:3, leader:1, peacemaker:0 } }
+    ]},
+  { text:'你更倾向于哪种学习方式？',
+    options: [
+      { text:'动手尝试，在实践中试错', scores:{ explorer:3, thinker:1, guardian:0, creator:2, leader:0, peacemaker:0 } },
+      { text:'系统阅读，先理解理论框架', scores:{ explorer:0, thinker:3, guardian:1, creator:1, leader:1, peacemaker:0 } },
+      { text:'跟着有经验的人一步步学', scores:{ explorer:0, thinker:0, guardian:3, creator:0, leader:0, peacemaker:2 } },
+      { text:'通过创造作品来学习', scores:{ explorer:1, thinker:0, guardian:0, creator:3, leader:1, peacemaker:0 } },
+      { text:'设定明确目标，以终为始', scores:{ explorer:0, thinker:1, guardian:1, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'朋友心情不好来找你倾诉，你会？',
+    options: [
+      { text:'帮他分析问题出在哪，给出建议', scores:{ explorer:0, thinker:3, guardian:1, creator:0, leader:1, peacemaker:1 } },
+      { text:'默默陪着，递纸巾，给个拥抱', scores:{ explorer:0, thinker:0, guardian:3, creator:0, leader:0, peacemaker:3 } },
+      { text:'带他出去做点有趣的事，转移注意力', scores:{ explorer:3, thinker:0, guardian:1, creator:1, leader:0, peacemaker:1 } },
+      { text:'鼓励他振作，一起制定改善计划', scores:{ explorer:0, thinker:1, guardian:0, creator:1, leader:3, peacemaker:0 } }
+    ]},
+  { text:'哪种工作环境最让你有成就感？',
+    options: [
+      { text:'充满变化、每天不一样的挑战', scores:{ explorer:3, thinker:1, guardian:0, creator:1, leader:1, peacemaker:0 } },
+      { text:'可以深度思考、专注研究的安静环境', scores:{ explorer:0, thinker:3, guardian:1, creator:2, leader:0, peacemaker:0 } },
+      { text:'团队融洽、互相支持的氛围', scores:{ explorer:0, thinker:0, guardian:2, creator:0, leader:0, peacemaker:3 } },
+      { text:'能自由表达创意、不被条框束缚', scores:{ explorer:1, thinker:0, guardian:0, creator:3, leader:0, peacemaker:1 } },
+      { text:'有明确目标和高标准的地方', scores:{ explorer:0, thinker:1, guardian:1, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'做一个重要决定时，你更依赖？',
+    options: [
+      { text:'直觉和当下的感觉', scores:{ explorer:2, thinker:0, guardian:0, creator:2, leader:1, peacemaker:1 } },
+      { text:'数据和逻辑分析', scores:{ explorer:0, thinker:3, guardian:1, creator:0, leader:2, peacemaker:0 } },
+      { text:'参考他人的经验和建议', scores:{ explorer:1, thinker:1, guardian:2, creator:0, leader:0, peacemaker:2 } },
+      { text:'自己的目标和长远规划', scores:{ explorer:0, thinker:1, guardian:1, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'朋友一般怎么形容你？',
+    options: [
+      { text:'"你总是知道好多好玩的事儿！"', scores:{ explorer:3, thinker:1, guardian:0, creator:1, leader:0, peacemaker:1 } },
+      { text:'"你分析问题特别清楚"', scores:{ explorer:0, thinker:3, guardian:1, creator:0, leader:1, peacemaker:0 } },
+      { text:'"有你在就觉得很安心"', scores:{ explorer:0, thinker:0, guardian:3, creator:0, leader:0, peacemaker:2 } },
+      { text:'"你总是能想出超酷的点子"', scores:{ explorer:1, thinker:0, guardian:0, creator:3, leader:0, peacemaker:0 } },
+      { text:'"你天生就是当领导的料"', scores:{ explorer:0, thinker:1, guardian:0, creator:0, leader:3, peacemaker:0 } },
+      { text:'"你总能让大家和睦相处"', scores:{ explorer:0, thinker:0, guardian:1, creator:0, leader:0, peacemaker:3 } }
+    ]},
+  { text:'面对一个全新的陌生领域，你的第一反应是？',
+    options: [
+      { text:'兴奋！想立刻跳进去看看是怎么回事', scores:{ explorer:3, thinker:1, guardian:0, creator:1, leader:1, peacemaker:0 } },
+      { text:'先找几本经典入门书系统了解一下', scores:{ explorer:0, thinker:3, guardian:1, creator:1, leader:0, peacemaker:0 } },
+      { text:'有点谨慎，先观察观察再说', scores:{ explorer:0, thinker:1, guardian:3, creator:0, leader:0, peacemaker:1 } },
+      { text:'思考怎么把自己已有的能力迁移过来', scores:{ explorer:1, thinker:2, guardian:0, creator:1, leader:2, peacemaker:0 } }
+    ]},
+  { text:'你更在意人生中的哪个方面？',
+    options: [
+      { text:'体验的广度和丰富性', scores:{ explorer:3, thinker:0, guardian:1, creator:1, leader:0, peacemaker:1 } },
+      { text:'理解的深度和智慧的积累', scores:{ explorer:0, thinker:3, guardian:1, creator:1, leader:1, peacemaker:0 } },
+      { text:'关系的质量和对他人的意义', scores:{ explorer:0, thinker:0, guardian:3, creator:0, leader:0, peacemaker:3 } },
+      { text:'创造和表达自我的自由', scores:{ explorer:1, thinker:0, guardian:0, creator:3, leader:1, peacemaker:0 } },
+      { text:'成就和影响力的实现', scores:{ explorer:0, thinker:1, guardian:0, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'你收到一份意料之外的礼物，你会？',
+    options: [
+      { text:'超开心，立刻拆开看看是什么', scores:{ explorer:3, thinker:0, guardian:1, creator:1, leader:0, peacemaker:1 } },
+      { text:'先看看包装，推测一下里面是什么', scores:{ explorer:1, thinker:2, guardian:1, creator:1, leader:0, peacemaker:1 } },
+      { text:'很感动，想着怎么好好感谢对方', scores:{ explorer:0, thinker:0, guardian:2, creator:0, leader:0, peacemaker:3 } },
+      { text:'拆开后仔细研究，物尽其用', scores:{ explorer:0, thinker:1, guardian:2, creator:1, leader:1, peacemaker:0 } }
+    ]},
+  { text:'你更享受哪种社交场景？',
+    options: [
+      { text:'热闹的聚会，认识新朋友', scores:{ explorer:3, thinker:0, guardian:0, creator:1, leader:1, peacemaker:1 } },
+      { text:'三五好友的深度对话', scores:{ explorer:1, thinker:2, guardian:1, creator:1, leader:1, peacemaker:0 } },
+      { text:'小范围的熟人局，温馨舒服', scores:{ explorer:0, thinker:0, guardian:2, creator:0, leader:0, peacemaker:2 } },
+      { text:'根本不想社交，独处最自在', scores:{ explorer:1, thinker:2, guardian:0, creator:2, leader:0, peacemaker:0 } },
+      { text:'有目的的社交，比如行业交流', scores:{ explorer:1, thinker:1, guardian:0, creator:0, leader:3, peacemaker:0 } }
+    ]},
+  { text:'下面哪个描述最接近你的生活哲学？',
+    options: [
+      { text:'人生是一场冒险，去体验就对了', scores:{ explorer:3, thinker:0, guardian:0, creator:1, leader:1, peacemaker:0 } },
+      { text:'凡事求个明白，真相最重要', scores:{ explorer:0, thinker:3, guardian:0, creator:0, leader:1, peacemaker:0 } },
+      { text:'踏实过好每一天，对得起身边的人', scores:{ explorer:0, thinker:0, guardian:3, creator:0, leader:0, peacemaker:2 } },
+      { text:'美和表达是人生的意义', scores:{ explorer:1, thinker:0, guardian:0, creator:3, leader:0, peacemaker:1 } },
+      { text:'要么不做，要做就做最好', scores:{ explorer:0, thinker:1, guardian:0, creator:0, leader:3, peacemaker:0 } },
+      { text:'大家好才是真的好', scores:{ explorer:0, thinker:0, guardian:1, creator:0, leader:0, peacemaker:3 } }
+    ]}
+];
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+function startQuiz() {
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  renderQuestion(0);
+}
+function renderQuestion(idx) {
+  current = idx;
+  const q = QUESTIONS[idx];
+  const container = document.getElementById('optionsContainer');
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('progressFill').style.width = ((idx+1)/QUESTIONS.length*100)+'%';
+  document.getElementById('quizCounter').textContent = (idx+1)+' / '+QUESTIONS.length;
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option' + (answers[idx] === i ? ' selected' : '');
+    btn.innerHTML = '<span class="dot"></span>'+opt.text;
+    btn.onclick = () => selectOption(i);
+    container.appendChild(btn);
+  });
+  prev.disabled = idx === 0;
+  next.disabled = answers[idx] === null;
+  if (idx < QUESTIONS.length-1) {
+    next.innerHTML = '下一题<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-left:4px"><path d="m9 18 6-6-6-6"/></svg>';
+  } else {
+    next.innerHTML = '查看结果<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-left:4px"><path d="m9 18 6-6-6-6"/></svg>';
+  }
+}
+function selectOption(i) {
+  answers[current] = i;
+  const options = document.getElementById('optionsContainer').children;
+  for (let j=0; j<options.length; j++) options[j].classList.toggle('selected', j===i);
+  document.getElementById('nextBtn').disabled = false;
+}
+function nextQuestion() {
+  if (answers[current] === null) return;
+  if (current === QUESTIONS.length-1) { showResults(); return; }
+  renderQuestion(current+1);
+}
+function prevQuestion() {
+  if (current === 0) return;
+  renderQuestion(current-1);
+}
+function showResults() {
+  const scores = { explorer:0, thinker:0, guardian:0, creator:0, leader:0, peacemaker:0 };
+  QUESTIONS.forEach((q, qi) => {
+    if (answers[qi] === null) return;
+    const opt = q.options[answers[qi]];
+    for (const [k,v] of Object.entries(opt.scores)) scores[k] += v;
+  });
+  const maxScore = Math.max(...Object.values(scores));
+  const primary = TYPES.find(t => scores[t.id] === maxScore);
+  const sorted = [...TYPES].sort((a,b) => scores[b.id] - scores[a.id]);
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+  const maxPossible = QUESTIONS.length * 3;
+  const container = document.getElementById('results');
+  container.className = 'screen active type-'+primary.id;
+  container.innerHTML = `
+    <div class="result-header">
+      <div class="result-type-badge">${primary.emoji} ${primary.label}</div>
+      <div class="result-title">你的核心特质：${primary.label}</div>
+      <div class="result-subtitle">${primary.desc}</div>
+    </div>
+    <div class="result-scores">
+      ${sorted.map(t => {
+        const pct = Math.round(scores[t.id]/maxPossible*100);
+        return '<div class="score-row">'
+          +'<div class="score-label '+t.id[0]+'">'+t.emoji+' '+t.label+'</div>'
+          +'<div class="score-bar-track"><div class="score-bar-fill" style="width:'+pct+'%"></div></div>'
+          +'<div class="score-val">'+pct+'%</div></div>';
+      }).join('')}
+    </div>
+    <div class="result-detail">
+      <h3>✨ 你的优势</h3>
+      <ul>${primary.strengths.map(s => '<li>'+s+'</li>').join('')}</ul>
+    </div>
+    <div class="result-detail">
+      <h3>🌱 成长建议</h3>
+      <ul>${primary.growth.map(s => '<li>'+s+'</li>').join('')}</ul>
+    </div>
+    <div class="result-detail">
+      <h3>📊 完整特质分布</h3>
+      <p>你的特质分布：<strong>${primary.label}</strong>（主导）→ ${sorted.slice(1,3).map(t => t.label+' · '+Math.round(scores[t.id]/maxPossible*100)+'%').join(' → ')}。你的人格是独一无二的组合，没有哪个维度比另一个更好——它们只是你不同侧面的光芒。</p>
+    </div>
+    <div class="result-actions">
+      <button class="btn-secondary" onclick="restart()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        重新测试
+      </button>
+      <button class="btn-secondary" onclick="shareResult()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg>
+        分享结果
+      </button>
+    </div>
+  `;
+}
+function restart() {
+  answers = new Array(QUESTIONS.length).fill(null);
+  current = 0;
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('welcome').classList.add('active');
+}
+function shareResult() {
+  const scores = { explorer:0, thinker:0, guardian:0, creator:0, leader:0, peacemaker:0 };
+  QUESTIONS.forEach((q, qi) => {
+    if (answers[qi] === null) return;
+    const opt = q.options[answers[qi]];
+    for (const [k,v] of Object.entries(opt.scores)) scores[k] += v;
+  });
+  const maxScore = Math.max(...Object.values(scores));
+  const primary = TYPES.find(t => scores[t.id] === maxScore);
+  const text = '🧠 我刚完成了「人格测试工具」测试！\n我的核心特质是：'+primary.emoji+' '+primary.label+'\n\n来试试看：'+window.location.href;
+  if (navigator.share) {
+    navigator.share({ title:'人格测试工具', text }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.result-actions .btn-secondary:last-child');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ 已复制';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    });
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'Enter') { nextQuestion(); }
+  if (e.key === 'ArrowLeft') { prevQuestion(); }
+});
+</script>
+</body>
+</html>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c5ce7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}
+</script>
+</body>
+</html>

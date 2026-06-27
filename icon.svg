@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#a29bfe"/>
+    </linearGradient>
+    <linearGradient id="b1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00b873"/>
+      <stop offset="100%" stop-color="#00d68f"/>
+    </linearGradient>
+    <linearGradient id="b2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#54a0ff"/>
+    </linearGradient>
+    <linearGradient id="b3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ff9f43"/>
+    </linearGradient>
+    <linearGradient id="b4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e75a8a"/>
+      <stop offset="100%" stop-color="#ff6b9d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <!-- Brain / mind icon -->
+  <g transform="translate(256,240)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left hemisphere -->
+    <path d="M-64,-60 C-96,-60 -120,-40 -120,-10 C-120,10 -108,28 -88,34" stroke-width="14"/>
+    <path d="M-88,34 C-96,44 -104,56 -96,72 C-88,88 -72,92 -56,84" stroke-width="14"/>
+    <path d="M-56,84 C-40,96 -16,104 0,96" stroke-width="14"/>
+    <!-- Right hemisphere -->
+    <path d="M64,-60 C96,-60 120,-40 120,-10 C120,10 108,28 88,34" stroke-width="14"/>
+    <path d="M88,34 C96,44 104,56 96,72 C88,88 72,92 56,84" stroke-width="14"/>
+    <path d="M56,84 C40,96 16,104 0,96" stroke-width="14"/>
+    <!-- Top folds -->
+    <path d="M-48,-44 C-36,-56 0,-66 0,-66 C0,-66 36,-56 48,-44" stroke-width="12"/>
+    <path d="M-72,-24 C-56,-36 0,-48 0,-48 C0,-48 56,-36 72,-24" stroke-width="12"/>
+    <!-- Middle folds -->
+    <path d="M-80,-2 C-56,-16 0,-28 0,-28 C0,-28 56,-16 80,-2" stroke-width="11"/>
+    <path d="M-80,22 C-56,8 0,-4 0,-4 C0,-4 56,8 80,22" stroke-width="10"/>
+    <!-- Bottom -->
+    <path d="M-64,46 C-40,32 0,20 0,20 C0,20 40,32 64,46" stroke-width="9"/>
+  </g>
+  <!-- Personality spectrum bars -->
+  <g transform="translate(256,390)">
+    <rect x="-80" y="-8" width="26" height="28" rx="4" fill="url(#b1)"/>
+    <rect x="-48" y="-18" width="26" height="38" rx="4" fill="url(#b2)"/>
+    <rect x="-16" y="-28" width="26" height="48" rx="4" fill="url(#b3)"/>
+    <rect x="16" y="-22" width="26" height="42" rx="4" fill="url(#b4)"/>
+    <rect x="48" y="-12" width="26" height="32" rx="4" fill="url(#bg)"/>
+  </g>
+</svg>
